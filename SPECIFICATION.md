@@ -11,83 +11,55 @@ grounds_on:
 
 # SPECIFICATION — dyad-system: claim/invariant validated-factory engine
 
-> **Cairn's Architectural Map.** This document defines the structural schemas, layout, id-generation, and mechanical execution logic required to implement the single-identity Model B contract defined in `REQUIREMENTS.md`.
+> **Cairn's Architectural Map.** This document mechanically implements the single-identity Model B contract.
 > 
-> *Note: All alphanumerical constraints and falsifiers (e.g., A-1, F-3, F-7.1) referenced in this document map directly to their definitions in [REQUIREMENTS.md](./REQUIREMENTS.md).*
+> *Note: All alphanumerical constraints and falsifiers (e.g., A-1, F-3, F-7.1) map directly to their definitions in [REQUIREMENTS.md](./REQUIREMENTS.md).*
 
-## 1. Corpus Structure & Layout
+## 0. Terms & label index
 
-The corpus consists of two flat YAML files stored in the repository root (or configurable directory path).
-To satisfy portability (F-5) and auditable layout, the files are standard YAML lists of claim objects.
+**Domain mapped to filesystem objects.** *candidate corpus* maps physically to `theory-pipeline.yaml` (a flat YAML array). *invariant corpus* maps physically to `invariants-bond.yaml` (a flat YAML array). A flat YAML array natively enforces layout consistency and surfaces concurrency edits as explicit Git conflicts.
 
-- **`theory-pipeline.yaml`**: A YAML array `[]` of candidate-phase claims.
-- **`invariants-bond.yaml`**: A YAML array `[]` of invariant-phase claims.
+## 1. Intent — what and why
 
-A YAML array layout inherently enforces order and prevents silent overwriting during merge conflicts, natively elevating concurrent modifications to explicit Git conflicts when necessary.
+**The engine execution boundary.** The machinery operates as a stateless CLI tool executing locally on a Git working tree. The state transitions are executed by the machinery, but the transaction boundary and audit trail rely entirely on the Git substrate.
 
-## 2. ID-Generation Strategy (Concurrency & Collisions)
+## 2. Semantic requirements — bond's Truth, the contract the engine must enforce
 
-**Mechanism:** `UUIDv4` (Universally Unique Identifier).
-**Rationale:** To satisfy Section 3's concurrency constraint ("collision-free under concurrent claim-creation on isolated branches") without maintaining hidden persistent state or centralized counters, all claims will be minted with a randomly generated 128-bit UUIDv4 (e.g., `id: 550e8400-e29b-41d4-a716-446655440000`). This guarantees mathematical collision resistance across isolated branches.
+- **R1 / R2 — claim-core & field partition.** The schemas strictly map to the phase definition. The engine evaluates schema conformance per state (A-3).
+  - *claim-core*: `id` (UUIDv4), `schema_version` (1.0), `provenance` (string), `re_rub_triggers` (list of strings).
+  - *candidate-phase*: `grade`, `coverage`, `prediction_pair`, `disposition_history`.
+  - *invariant-phase*: `prescription`, `scope`, `observability`, `math`, `root`, `grounded_in`.
+- **R3 — single identity.** The `graduate` operation reads the target UUID from `theory-pipeline.yaml`, combines the history fields with the CLI-supplied invariant fields, and appends the object to `invariants-bond.yaml`. The identity remains identical.
+- **R4 — id-uniqueness.** `UUIDv4` generation inherently guarantees mathematical collision-resistance across isolated branches, satisfying the invariant without a centralized counter.
+- **R5 — removal is retirement only.** The `graduate` operation structurally lacks removal capabilities. `retire` acts as the exclusive deletion path.
+- **R6 — graduation mutation ruleset.** The `graduate` command takes `--invariant-data <file.yml>` as input. It copies candidate fields directly to the target schema (freezing them) and populates the invariant schema from the explicitly supplied data file. The engine generates no semantic strings.
+- **R7 — declared trust boundary.** The engine CLI outputs the B-1..B-4 assumptions to stdout upon completion (F-6).
 
-## 3. Claim Schema
+## 3. Constraints
 
-Every claim in the corpus follows a strict schema partition.
+**Preconditions the engine must enforce.**
+- **A-1 committed-state / F-7.1 dirty-tree halt.** The engine checks `git status --porcelain`. A non-empty return triggers an immediate `HALT`.
+- **A-2 UTF-8 and LF / F-7.2.** The file stream parser validates encoding and line endings prior to mutation.
+- **A-3 / F-7.3 schema version.** Hardcoded `schema_version` check on ingest.
+- **A-4 / F-7.4 mid-run TOCTOU.** The engine caches file modification timestamps on read, verifying them prior to the write flush.
+- **A-5 cross-file atomicity (The F-3 / §3 resolution).** The engine executes physical writes to both files sequentially. If interrupted mid-write (e.g., SIGKILL), the filesystem is torn. This structurally dirties the Git tree. On any subsequent consumption attempt, the A-1/F-7.1 `HALT` explicitly blocks parsing of the torn state. The Operator executes `git restore .` to revert to the last known-good committed state. This explicitly guarantees the claim is NEVER left in "neither" or "both" consumed states.
 
-**Claim-Core Fields (Always Present)**
-* `id` (string): The UUIDv4.
-* `schema_version` (string): e.g., "1.0", to satisfy A-3 / F-7.3.
-* `provenance` (string): Origin of the friction.
-* `re_rub_triggers` (list of strings): The adjudication vocabulary.
+**Recovery / Concurrency / Enforceability / Solution-shape.** 
+- **Concurrency:** `UUIDv4` ensures IDs do not collide on independent branches.
+- **Dependency budget:** Written in zero-dependency standard libraries (e.g., Python `yaml` / `json` built-ins). No external databases or hidden persistent state (`.sqlite` / `.log` files).
 
-**Candidate-Phase Fields (Live while candidate; Frozen history upon graduation)**
-* `grade` (string)
-* `coverage` (string)
-* `prediction_pair` (string)
-* `disposition_history` (list of strings)
+## 4. Acceptance criteria — the F-set
 
-**Invariant-Phase Fields (Absent in candidate; Required upon graduation)**
-* `prescription` (string)
-* `scope` (string)
-* `observability` (string)
-* `math` (string)
-* `root` (boolean/string)
-* `grounded_in` (list of strings): Must reference valid `id`s within the corpus (F-8.1).
+**The execution primitive mappings (D-1).**
+| operation | execution mapping |
+|---|---|
+| `validate` | Reads both corpus files. Scans for duplicate UUIDs across the entire corpus (F-2.2, F-8.2). Scans for `grounded_in` edges pointing to nonexistent UUIDs (F-8.1). Verifies schema compliance (F-2.1). |
+| `create-candidate` | Mints UUIDv4, appends input fields to `theory-pipeline.yaml`. |
+| `graduate` | Relocates candidate to `invariants-bond.yaml`, applies R6 field freeze + invariant demand. F-8.3 checked prior to write. |
+| `retire` | Scans corpus for inbound `grounded_in` edges (F-8.4). Unlinks and deletes the target UUID. |
 
-## 4. Operational Mechanics
+**Testing (D-2, D-3, D-4):** Automated bash harnesses paired with malformed corpus fixtures simulate each F-set breach and capture the exact `HALT` exit codes.
 
-The engine exposes four mechanical CLI operations (D-1):
+## 5. Out of scope for the builder — stays bond's, permanently
 
-### A. `validate`
-**Function:** A stateless validator ensuring semantic and structural integrity across the corpus.
-**Enforcements:**
-1. A-1 / F-7.1: Halts if `git status --porcelain` is not empty (dirty tree halt).
-2. A-2 / F-7.2: Halts on non-UTF-8 or CRLF line endings.
-3. F-2.2 / F-8.2: Scans both files. Halts if ANY duplicate `id` is found (either within one file or across both).
-4. F-8.1: Validates all `grounded_in` edges point to an `id` that exists in the corpus.
-5. F-2.1: Validates field schemas strictly matching Section 3.
-
-### B. `create-candidate`
-**Function:** Mints a new candidate.
-**Execution:**
-- Takes candidate-phase fields as input (e.g., via a `.yml` template file or flags).
-- Generates a new `UUIDv4`.
-- Appends the candidate object to `theory-pipeline.yaml`.
-- Engine validates the new corpus state in memory before writing to disk.
-
-### C. `graduate`
-**Function:** Relocates a candidate to an invariant, freezing history.
-**Execution:**
-- Takes a target `id` and an `--invariant-data <file.yml>` containing the bond-authored invariant fields.
-- Checks if the claim is already in `invariants-bond.yaml` (F-8.3 double-graduation halt).
-- Removes the claim from `theory-pipeline.yaml`.
-- Appends the candidate fields (now frozen history) and the new invariant fields to the claim.
-- Appends the updated claim to `invariants-bond.yaml`.
-- **Atomicity Guard (F-3 vs §3):** The engine writes to disk. If interrupted mid-write via SIGKILL, the files are physically torn on disk. However, the engine inherently enforces a clean tree precondition (A-1). The torn tree is dirty. On the next run (or any consumption attempt), `validate` immediately halts (F-7.1), explicitly trapping the torn state. The Operator executes `git restore .` to revert to the last known-good committed state, satisfying Section 3's "recoverable to" mandate and mathematically guaranteeing the claim is never "lost" (in neither file).
-
-### D. `retire`
-**Function:** Permanently deletes a claim.
-**Execution:**
-- Takes a target `id`.
-- Scans the entire corpus to ensure no live claim's `grounded_in` field points to this `id` (F-8.4 retire-orphan halt).
-- Removes the claim from whichever file it resides in.
+The engine evaluates structural boundaries only. It strictly lacks capabilities to judge claim readiness, author human descriptions, or determine obsolescence.
