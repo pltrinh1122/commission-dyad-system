@@ -132,8 +132,9 @@ choose.
 
 ## 4. Acceptance criteria — the F-set
 
-The `done_when`. NON-NEGOTIABLE. Each atom is binary: {MET | REFUTED | UNVERIFIED}. Each atom below
-carries its breach-condition: observing the breach ⇒ REFUTED unless MET.
+The `done_when`. NON-NEGOTIABLE. Each atom resolves to exactly one of {MET | REFUTED | UNVERIFIED}
+(UNVERIFIED until an observed run-record exists per D-3). Each atom below carries its breach-condition:
+observing the breach ⇒ REFUTED unless MET.
 
 #### F-1.1: In-Memory Determinism
 Breach ⇒ REFUTED: two runs over identical in-memory input differ ≥1 byte.
@@ -273,8 +274,9 @@ self-contained/stdlib — apply identically.
 ### 6.4 Acceptance criteria — the extraction F-set (F-X-n)
 
 **Namespaced `F-X-` on purpose** (see §0): the factory F-set (§4) and this set are **template-fill
-twins** — same skeleton, *different contracts* — so they stay in distinct label-spaces. Each atom is
-binary {MET | REFUTED | UNVERIFIED}. Each atom carries its breach-condition (observing the breach ⇒
+twins** — same skeleton, *different contracts* — so they stay in distinct label-spaces. Each atom
+resolves to exactly one of {MET | REFUTED | UNVERIFIED} (UNVERIFIED until an observed run-record exists
+per DX-3). Each atom carries its breach-condition (observing the breach ⇒
 REFUTED unless MET) and a **prior** marker: **`green`** marks an atom the 2026-06-17 delivery already
 passed *for the single-sidecar architecture* — a **de-risking prior, NOT a pass for the reworked
 union-view component** (re-run required); **`new`** marks union-view / single-identity scope with no
