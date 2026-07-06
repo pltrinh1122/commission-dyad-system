@@ -1,6 +1,8 @@
 # SPECIFICATION — dyad-system: claim/invariant validated-factory engine
 
 > **Cairn's Architectural Map.** This document defines the structural schemas, layout, id-generation, and mechanical execution logic required to implement the single-identity Model B contract defined in `REQUIREMENTS.md`.
+> 
+> *Note: All alphanumerical constraints and falsifiers (e.g., A-1, F-3, F-7.1) referenced in this document map directly to their definitions in [REQUIREMENTS.md](./REQUIREMENTS.md).*
 
 ## 1. Corpus Structure & Layout
 
