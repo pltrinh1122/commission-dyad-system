@@ -102,7 +102,12 @@ each gets a seeded corpus case.** A-1 committed-state, running only against a cl
 commit · A-2 UTF-8 and LF · A-3 claim-core version match · A-4 source-integrity, including mid-run
 mutation · A-5 cross-file atomicity — `graduate` relocates a claim across two files, so the removal from
 the candidate corpus and the insertion into the invariant corpus must be atomic, both or neither; a
-graduating claim is never left in both files or in neither.
+graduating claim is never left in both files or in neither. *Atomicity is evaluated at the committed-state
+(git) boundary, not the filesystem instant — the two writes land as one commit or not at all; a
+hard-interrupt torn working tree is permitted **iff** it fail-closed-halts (A-1/F-7.1) and is
+`git restore`-recoverable to the single consistent state (claim in candidate), the engine holding no
+transaction journal. The doubled phrasing above names the two forbidden **resting** states — the claim
+duplicated (both) or lost (neither); both are refutations, and `neither` is not an acceptable rollback.*
 
 **Recovery — bond states the intent; the mechanism is cairn's.** After any mid-run failure the corpus
 must be left at, or recoverable to, its last known-good committed state, with no partially-applied state
