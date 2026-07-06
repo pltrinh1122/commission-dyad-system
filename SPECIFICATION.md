@@ -1,3 +1,14 @@
+---
+commission: dyad-system-engine
+title: Architectural Specification — claim/invariant validated-factory engine
+owner: dyad-cairn
+status: proposed
+model: single-identity-claim
+grounds_on:
+  file: REQUIREMENTS.md
+  pin: d5a1727
+---
+
 # SPECIFICATION — dyad-system: claim/invariant validated-factory engine
 
 > **Cairn's Architectural Map.** This document defines the structural schemas, layout, id-generation, and mechanical execution logic required to implement the single-identity Model B contract defined in `REQUIREMENTS.md`.
