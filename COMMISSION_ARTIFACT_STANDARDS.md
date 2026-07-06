@@ -26,21 +26,15 @@ While generic documentation standards govern human readability, the Dyad Commiss
 
 **Aggregator Section Summary:** This section defines the lean, operationally necessary YAML frontmatter fields for commission artifacts, explicitly waiving bloated upstream standards.
 
-To prevent tracking overlap with Git history (dates, versions, authors) and CI state (review status), Commission Artifacts MUST reject generic metadata standards and ONLY include fields critical for deterministic execution.
+#### CAS-1.1: Frontmatter Schema
+To prevent tracking overlap with Git history (dates, versions, authors) and CI state (review status), Commission Artifacts MUST reject generic metadata standards and ONLY include fields critical for deterministic execution. The following fields MUST be provided:
 
-#### CAS-1.1: H1 Title Match
-The `title` frontmatter field MUST match the document H1 exactly.
+*   **`title`:** MUST match the document H1 exactly.
+*   **`commission`:** The target system identifier (e.g., `dyad-system-engine`).
+*   **`owner`:** The dyad identity responsible for the artifact (e.g., `dyad-cairn`).
+*   **`grounds_on` (Deliveries Only):** To enforce the "Scope Freeze" invariant of the Commission Protocol, the Delivery MUST explicitly link the upstream source file and the exact Git SHA pin via the `grounds_on` object (e.g., `file: REQUIREMENTS.md`, `pin: 6c3fc6d`).
 
-#### CAS-1.2: Commission Identifier
-The `commission` frontmatter field MUST define the target system identifier (e.g., `dyad-system-engine`).
-
-#### CAS-1.3: Ownership Declaration
-The `owner` frontmatter field MUST declare the dyad identity responsible for the artifact (e.g., `dyad-cairn`).
-
-#### CAS-1.4: Scope Freeze Pinning (Deliveries Only)
-To enforce the "Scope Freeze" invariant of the Commission Protocol, the Delivery MUST explicitly link the upstream source file and the exact Git SHA pin via the `grounds_on` object (e.g., `file: REQUIREMENTS.md`, `pin: 6c3fc6d`).
-
-#### CAS-1.5: Metadata Bloat Waiver
+#### CAS-1.2: Metadata Bloat Waiver
 Generic semantic tags (`document_type`, `domain`, `concepts`, `technologies`, `last_updated`, `version`) mandated by upstream standards ARE EXPLICITLY WAIVED as they provide no mechanical value to the test harnesses and overlap with version control properties.
 
 ## 3. Topological Mirroring
