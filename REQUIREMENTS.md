@@ -1,17 +1,7 @@
 ---
+title: REQUIREMENTS — dyad-system: claim/invariant validated-factory engine
 commission: dyad-system-engine
-title: claim/invariant validated-factory engine
-owner: dyad-bond                  # this file is bond's Truth layer
-status: draft                     # draft -> ratified by the Operator
-model: single-identity-claim      # a claim is ONE entity that persists through its lifecycle states
-supersedes:                       # bond-internal; not required to read this document
-  spec: dyad-bond commission spec
-  pin: c736f4b
-  scope: adopts the single-identity claim model; supersedes the earlier two-record framing and resolves the three points a cairn review falsified
-subsumes:                         # folded in by §6 this increment (fleet gate #12)
-  commission: commission-invariant-engine
-  file: REQUIREMENTS.md (10-line placeholder)
-  scope: the extraction component folds in as §6; the built F-green extractor enters as de-risking LEARNING, not an obligation to reuse as-is
+owner: dyad-bond
 ---
 
 # REQUIREMENTS — dyad-system: claim/invariant validated-factory engine
@@ -142,32 +132,74 @@ choose.
 
 ## 4. Acceptance criteria — the F-set
 
-The `done_when`. NON-NEGOTIABLE. Each atom is binary: {MET | REFUTED | UNVERIFIED}.
+The `done_when`. NON-NEGOTIABLE. Each atom is binary: {MET | REFUTED | UNVERIFIED}. Each atom below
+carries its breach-condition: observing the breach ⇒ REFUTED unless MET.
 
-| atom | breach-condition ⇒ REFUTED unless MET |
-|---|---|
-| F-1.1 in-memory determinism | two runs over identical in-memory input differ ≥1 byte |
-| F-1.2 sha-determinism | two runs over identical source shas differ ≥1 byte |
-| F-2.1 malformed-field halt | a schema-invalid field on `new`/`graduate` does not halt |
-| F-2.2 dup-id halt | a new claim id colliding with an existing id in EITHER file does not halt |
-| F-2.3 missing-source halt | a missing/unreadable corpus file does not halt |
-| F-3 atomicity guard | an interrupted `graduate` leaves the claim in both files or in neither |
-| F-4 no semantic drift | any engine-written field ≠ what was validated pre-write |
-| F-5 portability | a second dyad's substrate needs code changes, not config, to retarget |
-| F-6 trust-boundary declaration | a run's output omits its Class-B assumptions declaration |
-| F-7.1 dirty-tree halt | a dirty tree does not halt |
-| F-7.2 encoding/EOL halt | CRLF or encoding drift does not halt |
-| F-7.3 schema-version halt | a claim-core schema-version mismatch does not halt |
-| F-7.4 mid-run TOCTOU halt | a mid-run source mutation does not halt |
-| F-8.1 orphan-grounding halt | a `grounded_in` edge pointing to a non-existent claim id does not halt |
-| F-8.2 split-state halt | the same claim id present in BOTH corpus files does not halt |
-| F-8.3 double-graduation halt | graduating a claim already in the invariant state does not halt |
-| F-8.4 retire-orphan halt | retiring a claim that a live claim still grounds on does not halt |
+#### F-1.1: In-Memory Determinism
+Breach ⇒ REFUTED: two runs over identical in-memory input differ ≥1 byte.
 
-**Gate-0, checked BEFORE any F-atom.** D-1 the four operations — validate, create-candidate, graduate,
-and retire — are invokable and run to completion · D-2 seeded malformation corpus for every F-atom,
-including the two-file and atomicity cases · D-3 per-atom OBSERVED run-record — `atom → command →
-observed exit/output`, not a summary attestation · D-4 resolved pinned provenance of the deliverable.
+#### F-1.2: SHA-Determinism
+Breach ⇒ REFUTED: two runs over identical source shas differ ≥1 byte.
+
+#### F-2.1: Malformed-Field Halt
+Breach ⇒ REFUTED: a schema-invalid field on `new`/`graduate` does not halt.
+
+#### F-2.2: Dup-ID Halt
+Breach ⇒ REFUTED: a new claim id colliding with an existing id in EITHER file does not halt.
+
+#### F-2.3: Missing-Source Halt
+Breach ⇒ REFUTED: a missing/unreadable corpus file does not halt.
+
+#### F-3: Atomicity Guard
+Breach ⇒ REFUTED: an interrupted `graduate` leaves the claim in both files or in neither.
+
+#### F-4: No Semantic Drift
+Breach ⇒ REFUTED: any engine-written field ≠ what was validated pre-write.
+
+#### F-5: Portability
+Breach ⇒ REFUTED: a second dyad's substrate needs code changes, not config, to retarget.
+
+#### F-6: Trust-Boundary Declaration
+Breach ⇒ REFUTED: a run's output omits its Class-B assumptions declaration.
+
+#### F-7.1: Dirty-Tree Halt
+Breach ⇒ REFUTED: a dirty tree does not halt.
+
+#### F-7.2: Encoding/EOL Halt
+Breach ⇒ REFUTED: CRLF or encoding drift does not halt.
+
+#### F-7.3: Schema-Version Halt
+Breach ⇒ REFUTED: a claim-core schema-version mismatch does not halt.
+
+#### F-7.4: Mid-Run TOCTOU Halt
+Breach ⇒ REFUTED: a mid-run source mutation does not halt.
+
+#### F-8.1: Orphan-Grounding Halt
+Breach ⇒ REFUTED: a `grounded_in` edge pointing to a non-existent claim id does not halt.
+
+#### F-8.2: Split-State Halt
+Breach ⇒ REFUTED: the same claim id present in BOTH corpus files does not halt.
+
+#### F-8.3: Double-Graduation Halt
+Breach ⇒ REFUTED: graduating a claim already in the invariant state does not halt.
+
+#### F-8.4: Retire-Orphan Halt
+Breach ⇒ REFUTED: retiring a claim that a live claim still grounds on does not halt.
+
+### Gate-0 — checked BEFORE any F-atom
+
+#### D-1: Operations Invokable
+The four operations — validate, create-candidate, graduate, and retire — are invokable and run to
+completion.
+
+#### D-2: Seeded Malformation Corpus
+A seeded malformation corpus for every F-atom, including the two-file and atomicity cases.
+
+#### D-3: Per-Atom Observed Run-Record
+`atom → command → observed exit/output`, not a summary attestation.
+
+#### D-4: Resolved Provenance
+Resolved pinned provenance of the deliverable.
 
 ## 5. Out of scope for the builder — stays bond's, permanently
 
@@ -242,35 +274,77 @@ self-contained/stdlib — apply identically.
 
 **Namespaced `F-X-` on purpose** (see §0): the factory F-set (§4) and this set are **template-fill
 twins** — same skeleton, *different contracts* — so they stay in distinct label-spaces. Each atom is
-binary {MET | REFUTED | UNVERIFIED}. **`green`** marks an atom the 2026-06-17 delivery already passed
-*for the single-sidecar architecture* — a **de-risking prior, NOT a pass for the reworked union-view
-component** (re-run required); **`new`** marks union-view / single-identity scope with no prior
-validation.
+binary {MET | REFUTED | UNVERIFIED}. Each atom carries its breach-condition (observing the breach ⇒
+REFUTED unless MET) and a **prior** marker: **`green`** marks an atom the 2026-06-17 delivery already
+passed *for the single-sidecar architecture* — a **de-risking prior, NOT a pass for the reworked
+union-view component** (re-run required); **`new`** marks union-view / single-identity scope with no
+prior validation.
 
-| atom | breach-condition (⇒ REFUTED unless MET) | prior |
-|---|---|---|
-| F-X-1.1 fn-determinism | two runs over identical in-memory source differ ≥1 byte | green |
-| F-X-1.2 sha-determinism | two runs over identical source shas differ ≥1 byte | green |
-| F-X-2.1 unclosed-tag halt | an unclosed tag does not halt | green |
-| F-X-2.2 dup-tag-id halt | a duplicate prose tag id does not halt | green |
-| F-X-2.3 missing-source halt | a missing/unreadable source does not halt | green |
-| F-X-3 staleness guard | source mutated post-emit; the guard fails to arm | green (extend to two-corpus pins) |
-| F-X-4 no one-liner drift | any emitted one-liner ≠ its stored source one-liner | green |
-| F-X-5 portability | a second dyad's substrate needs code, not config | green |
-| F-X-6 trust-boundary header | an emitted view omits its BX-1..BX-4 declaration | green |
-| F-X-7.1 dirty-tree halt | a dirty tree does not halt | green |
-| F-X-7.2 encoding/EOL halt | CRLF/encoding drift does not halt | green |
-| F-X-7.3 grammar-version halt | a tag-grammar version mismatch does not halt | green |
-| F-X-7.4 mid-scan TOCTOU halt | a mid-scan source mutation does not halt | green |
-| F-X-8.1 orphan-tag halt | a tag id present in **neither** corpus does not halt | **new** (was "no sidecar entry") |
-| F-X-8.2 split-state halt | a tag id present in **both** corpora (an R4 corruption) does not halt | **new** |
-| F-X-8.3 graduation-linkage | a claim's tag linkage breaks across its graduation relocation | **new** |
-| F-X-8.4 cross-home-dup halt | the same id in >1 prose tag does not halt | green |
+#### F-X-1.1: Fn-Determinism
+Breach ⇒ REFUTED: two runs over identical in-memory source differ ≥1 byte. *(prior: green)*
 
-**Gate-0 (component), checked before any F-X atom.** DX-1 a runnable `extract` entrypoint · DX-2 seeded
-corpus for every F-X atom, **including** the union-view and graduation-relocation cases the pilot's
-single-sidecar scope never needed · DX-3 per-atom OBSERVED run-record — `atom → command → observed
-exit/output` · DX-4 resolved pinned provenance of the deliverable.
+#### F-X-1.2: SHA-Determinism
+Breach ⇒ REFUTED: two runs over identical source shas differ ≥1 byte. *(prior: green)*
+
+#### F-X-2.1: Unclosed-Tag Halt
+Breach ⇒ REFUTED: an unclosed tag does not halt. *(prior: green)*
+
+#### F-X-2.2: Dup-Tag-ID Halt
+Breach ⇒ REFUTED: a duplicate prose tag id does not halt. *(prior: green)*
+
+#### F-X-2.3: Missing-Source Halt
+Breach ⇒ REFUTED: a missing/unreadable source does not halt. *(prior: green)*
+
+#### F-X-3: Staleness Guard
+Breach ⇒ REFUTED: source mutated post-emit; the guard fails to arm. *(prior: green — extend to two-corpus pins)*
+
+#### F-X-4: No One-Liner Drift
+Breach ⇒ REFUTED: any emitted one-liner ≠ its stored source one-liner. *(prior: green)*
+
+#### F-X-5: Portability
+Breach ⇒ REFUTED: a second dyad's substrate needs code, not config. *(prior: green)*
+
+#### F-X-6: Trust-Boundary Header
+Breach ⇒ REFUTED: an emitted view omits its BX-1..BX-4 declaration. *(prior: green)*
+
+#### F-X-7.1: Dirty-Tree Halt
+Breach ⇒ REFUTED: a dirty tree does not halt. *(prior: green)*
+
+#### F-X-7.2: Encoding/EOL Halt
+Breach ⇒ REFUTED: CRLF/encoding drift does not halt. *(prior: green)*
+
+#### F-X-7.3: Grammar-Version Halt
+Breach ⇒ REFUTED: a tag-grammar version mismatch does not halt. *(prior: green)*
+
+#### F-X-7.4: Mid-Scan TOCTOU Halt
+Breach ⇒ REFUTED: a mid-scan source mutation does not halt. *(prior: green)*
+
+#### F-X-8.1: Orphan-Tag Halt
+Breach ⇒ REFUTED: a tag id present in **neither** corpus does not halt. *(prior: **new** — was "no sidecar entry")*
+
+#### F-X-8.2: Split-State Halt
+Breach ⇒ REFUTED: a tag id present in **both** corpora (an R4 corruption) does not halt. *(prior: **new**)*
+
+#### F-X-8.3: Graduation-Linkage
+Breach ⇒ REFUTED: a claim's tag linkage breaks across its graduation relocation. *(prior: **new**)*
+
+#### F-X-8.4: Cross-Home-Dup Halt
+Breach ⇒ REFUTED: the same id in >1 prose tag does not halt. *(prior: green)*
+
+### Gate-0 (component) — checked before any F-X atom
+
+#### DX-1: Runnable Extract Entrypoint
+A runnable `extract` entrypoint.
+
+#### DX-2: Seeded Corpus
+A seeded corpus for every F-X atom, **including** the union-view and graduation-relocation cases the
+pilot's single-sidecar scope never needed.
+
+#### DX-3: Per-Atom Observed Run-Record
+`atom → command → observed exit/output`.
+
+#### DX-4: Resolved Provenance
+Resolved pinned provenance of the deliverable.
 
 ### 6.5 Out of scope for the builder — extraction
 
