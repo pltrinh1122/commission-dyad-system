@@ -34,6 +34,18 @@ To prevent tracking overlap with Git history (dates, versions, authors) and CI s
 *   **`owner`:** The dyad identity responsible for the artifact (e.g., `dyad-cairn`).
 *   **`grounds_on` (Deliveries Only):** To enforce the "Scope Freeze" invariant of the Commission Protocol, the Delivery MUST explicitly link the upstream source file and the exact Git SHA pin via the `grounds_on` object (e.g., `file: REQUIREMENTS.md`, `pin: 6c3fc6d`).
 
+**Illustrative Template:**
+```yaml
+---
+title: Exact Document H1 String
+commission: dyad-system-engine
+owner: dyad-cairn
+grounds_on:
+  file: REQUIREMENTS.md
+  pin: 6c3fc6d
+---
+```
+
 #### CAS-1.2: Metadata Bloat Waiver
 Generic semantic tags (`document_type`, `domain`, `concepts`, `technologies`, `last_updated`, `version`) mandated by upstream standards ARE EXPLICITLY WAIVED as they provide no mechanical value to the test harnesses and overlap with version control properties.
 
