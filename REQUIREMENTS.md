@@ -1,17 +1,7 @@
 ---
+title: REQUIREMENTS — dyad-system: claim/invariant validated-factory engine
 commission: dyad-system-engine
-title: claim/invariant validated-factory engine
-owner: dyad-bond                  # this file is bond's Truth layer
-status: draft                     # draft -> ratified by the Operator
-model: single-identity-claim      # a claim is ONE entity that persists through its lifecycle states
-supersedes:                       # bond-internal; not required to read this document
-  spec: dyad-bond commission spec
-  pin: c736f4b
-  scope: adopts the single-identity claim model; supersedes the earlier two-record framing and resolves the three points a cairn review falsified
-subsumes:                         # folded in by §6 this increment (fleet gate #12)
-  commission: commission-invariant-engine
-  file: REQUIREMENTS.md (10-line placeholder)
-  scope: the extraction component folds in as §6; the built F-green extractor enters as de-risking LEARNING, not an obligation to reuse as-is
+owner: dyad-bond
 ---
 
 # REQUIREMENTS — dyad-system: claim/invariant validated-factory engine
@@ -35,19 +25,30 @@ and R6. *retire* — remove a claim that is no longer relevant to the dyad; the 
 candidates, `invariants-bond.yaml` holds invariants. A claim moves between them, keeping its id, when
 its state changes. The engine treats their paths as configuration, per F-5, so these names are the
 first-instance targets, not hardcoded. *tag* — a durable inline anchor at a claim's single prose home,
-holding its stored canonical one-liner; the extraction component (§6) binds tags to claim ids over the
-**union** of both corpus files. *view* — the deterministic single-pane emission of tagged claims (§6).
+holding its stored canonical one-liner; the extraction component (§4) binds tags to claim ids over the
+**union** of both corpus files. *view* — the deterministic single-pane emission of tagged claims (§4).
+
+**Component map.** The engine is ONE engine with **two components** over the one claim model, under a
+shared preamble: **§1** engine intent + claim model · **§2** shared constraints & solution-shape ·
+**§3 Component A** — the claim/invariant validated-factory · **§4 Component B** — the single-pane
+extraction view. Each component carries the same five-part skeleton (intent · semantic reqs ·
+constraints · acceptance · out-of-scope).
 
 **Label convention — every label is defined in THIS document; none points at an external list.**
-**R-**n is a requirement, §2 · **A-**n is a precondition the engine must enforce, §3 · **B-**n is a
-declared trust-boundary assumption, R7 · **D-**n is a Gate-0 delivery precondition, §4 · **F-**n is an
-acceptance falsifier, §4. The **extraction component (§6)** uses namespaced counterparts — **RX-**n
-requirement · **BX-**n trust-boundary · **DX-**n Gate-0 · **F-X-**n falsifier (the §3 preconditions are
+**R-**n is a requirement, §3.2 · **A-**n is a precondition the engine must enforce, §2 (A-5 §3.3) ·
+**B-**n is a declared trust-boundary assumption, R7 · **D-**n is a Gate-0 delivery precondition, §3.4 ·
+**F-**n is an acceptance falsifier, §3.4. **Component B (§4)** uses namespaced counterparts — **RX-**n
+requirement · **BX-**n trust-boundary · **DX-**n Gate-0 · **F-X-**n falsifier (the §2 preconditions are
 reused unchanged) — kept in a DISTINCT label-space from the factory's because the two share a template
-skeleton but NOT a contract: a same-numbered atom means different things in each (e.g. §4 `F-8.1` is
-orphan-*grounding*; §6 `F-X-8.1` is orphan-*tag*).
+skeleton but NOT a contract: a same-numbered atom means different things in each (e.g. §3.4 `F-8.1` is
+orphan-*grounding*; §4.4 `F-X-8.1` is orphan-*tag*).
 
-## 1. Intent — what and why
+## 1. Intent — the engine
+
+This engine has **two components over one claim model**: **Component A (§3)** — a validated factory that
+creates, graduates, and retires claims under enforced preconditions; and **Component B (§4)** — a
+single-pane extraction view that emits those claims deterministically. Both share this intent, the claim
+model below, and the constraints of §2.
 
 Two corpus files hold what is conceptually one thing — a **claim** — under independently-evolved,
 unaligned conventions, with nothing checking they stay compatible:
@@ -68,7 +69,38 @@ files are **state-partitions** of the one claim population: a claim lives in the
 under investigation and **moves, keeping its id**, to the invariant corpus when it graduates. A claim
 leaves the system only by explicit **retirement**, never by graduation.
 
-## 2. Semantic requirements — bond's Truth, the contract the engine must enforce
+## 2. Shared constraints & solution-shape
+
+Constraints and properties that bind **both components**. Grounding: Component B reuses A-1..A-4 and the
+solution-shape properties unchanged (§4.3); Component A adds the mutation-specific constraints of §3.3.
+
+**Preconditions the engine must enforce — any violation must HALT the operation with a named cause, and
+each gets a seeded corpus case.** A-1 committed-state, running only against a clean tree at a real
+commit · A-2 UTF-8 and LF · A-3 claim-core version match · A-4 source-integrity, including mid-run
+mutation. *(A-5 cross-file atomicity is factory-specific — it applies only to `graduate` — and lives in
+§3.3.)*
+
+**Solution-shape properties — the WHY only.** The HOW — dependency budget, runtime form, size, module
+layout — is cairn's `SPECIFICATION.md`, not stated here. *Portable* — retarget to another dyad's
+substrate by configuration, not code change, per F-5 · *auditable* — a non-builder dyad can read and
+check the engine's logic · *no hidden persistent state* — the engine runs and exits, holding no state
+between runs beyond the corpus files themselves · *self-contained* — no third-party runtime
+dependencies, so the engine is durable against dependency rot; the concrete runtime is cairn's to
+choose.
+
+## 3. Component A — claim/invariant validated-factory
+
+The mutation-and-validation core over the claim corpus: the four operations — validate, create-candidate,
+graduate, retire — each halting fail-closed on a violated precondition. Its contract is R1–R7 (§3.2), its
+mutation-specific constraints are §3.3, and its acceptance is the F-set (§3.4).
+
+### 3.1 Intent
+
+Realize the engine intent of §1 as an enforced mutation contract: every claim enters and moves through
+its lifecycle **only** through this factory's gated operations, so the structural checks §1 wants
+offloaded are paid once by the machine, fail-closed, on every create/graduate/retire.
+
+### 3.2 Semantic requirements — bond's Truth, the contract the engine must enforce
 
 - **R1 — claim-core contract.** One field contract every claim satisfies in every state; it is not
   subclassing and not a per-state record type. Shared and always-present: id and global-uniqueness
@@ -105,12 +137,12 @@ leaves the system only by explicit **retirement**, never by graduation.
     bond's human disposition, never the engine · B-4 no un-managed claim drifting outside the two corpus
     files.
 
-## 3. Constraints
+### 3.3 Constraints — the mutation-specific set
 
-**Preconditions the engine must enforce — any violation must HALT the operation with a named cause, and
-each gets a seeded corpus case.** A-1 committed-state, running only against a clean tree at a real
-commit · A-2 UTF-8 and LF · A-3 claim-core version match · A-4 source-integrity, including mid-run
-mutation · A-5 cross-file atomicity — `graduate` relocates a claim across two files, so the removal from
+Beyond the shared preconditions of §2, the factory's mutating operations add — each HALTing on a named
+cause with a seeded corpus case, as §2:
+
+**A-5 — cross-file atomicity.** `graduate` relocates a claim across two files, so the removal from
 the candidate corpus and the insertion into the invariant corpus must be atomic, both or neither; a
 graduating claim is never left in both files or in neither. *Atomicity is evaluated at the committed-state
 (git) boundary, not the filesystem instant — the two writes land as one commit or not at all; a
@@ -132,44 +164,79 @@ able to BLOCK a change from landing, not merely report it. The motivating drift 
 because the only check was opt-in and human-triggered; a check that can only be run by hand does not
 close the requirement.
 
-**Solution-shape properties — the WHY only.** The HOW — dependency budget, runtime form, size, module
-layout — is cairn's `SPECIFICATION.md`, not stated here. *Portable* — retarget to another dyad's
-substrate by configuration, not code change, per F-5 · *auditable* — a non-builder dyad can read and
-check the engine's logic · *no hidden persistent state* — the engine runs and exits, holding no state
-between runs beyond the corpus files themselves · *self-contained* — no third-party runtime
-dependencies, so the engine is durable against dependency rot; the concrete runtime is cairn's to
-choose.
+### 3.4 Acceptance criteria — the F-set
 
-## 4. Acceptance criteria — the F-set
+The `done_when`. NON-NEGOTIABLE. Each atom resolves to exactly one of {MET | REFUTED | UNVERIFIED}
+(UNVERIFIED until an observed run-record exists per D-3). Each atom below carries its breach-condition:
+observing the breach ⇒ REFUTED unless MET.
 
-The `done_when`. NON-NEGOTIABLE. Each atom is binary: {MET | REFUTED | UNVERIFIED}.
+#### F-1.1: In-Memory Determinism
+Breach ⇒ REFUTED: two runs over identical in-memory input differ ≥1 byte.
 
-| atom | breach-condition ⇒ REFUTED unless MET |
-|---|---|
-| F-1.1 in-memory determinism | two runs over identical in-memory input differ ≥1 byte |
-| F-1.2 sha-determinism | two runs over identical source shas differ ≥1 byte |
-| F-2.1 malformed-field halt | a schema-invalid field on `new`/`graduate` does not halt |
-| F-2.2 dup-id halt | a new claim id colliding with an existing id in EITHER file does not halt |
-| F-2.3 missing-source halt | a missing/unreadable corpus file does not halt |
-| F-3 atomicity guard | an interrupted `graduate` leaves the claim in both files or in neither |
-| F-4 no semantic drift | any engine-written field ≠ what was validated pre-write |
-| F-5 portability | a second dyad's substrate needs code changes, not config, to retarget |
-| F-6 trust-boundary declaration | a run's output omits its Class-B assumptions declaration |
-| F-7.1 dirty-tree halt | a dirty tree does not halt |
-| F-7.2 encoding/EOL halt | CRLF or encoding drift does not halt |
-| F-7.3 schema-version halt | a claim-core schema-version mismatch does not halt |
-| F-7.4 mid-run TOCTOU halt | a mid-run source mutation does not halt |
-| F-8.1 orphan-grounding halt | a `grounded_in` edge pointing to a non-existent claim id does not halt |
-| F-8.2 split-state halt | the same claim id present in BOTH corpus files does not halt |
-| F-8.3 double-graduation halt | graduating a claim already in the invariant state does not halt |
-| F-8.4 retire-orphan halt | retiring a claim that a live claim still grounds on does not halt |
+#### F-1.2: SHA-Determinism
+Breach ⇒ REFUTED: two runs over identical source shas differ ≥1 byte.
 
-**Gate-0, checked BEFORE any F-atom.** D-1 the four operations — validate, create-candidate, graduate,
-and retire — are invokable and run to completion · D-2 seeded malformation corpus for every F-atom,
-including the two-file and atomicity cases · D-3 per-atom OBSERVED run-record — `atom → command →
-observed exit/output`, not a summary attestation · D-4 resolved pinned provenance of the deliverable.
+#### F-2.1: Malformed-Field Halt
+Breach ⇒ REFUTED: a schema-invalid field on `new`/`graduate` does not halt.
 
-## 5. Out of scope for the builder — stays bond's, permanently
+#### F-2.2: Dup-ID Halt
+Breach ⇒ REFUTED: a new claim id colliding with an existing id in EITHER file does not halt.
+
+#### F-2.3: Missing-Source Halt
+Breach ⇒ REFUTED: a missing/unreadable corpus file does not halt.
+
+#### F-3: Atomicity Guard
+Breach ⇒ REFUTED: an interrupted `graduate` leaves the claim in both files or in neither.
+
+#### F-4: No Semantic Drift
+Breach ⇒ REFUTED: any engine-written field ≠ what was validated pre-write.
+
+#### F-5: Portability
+Breach ⇒ REFUTED: a second dyad's substrate needs code changes, not config, to retarget.
+
+#### F-6: Trust-Boundary Declaration
+Breach ⇒ REFUTED: a run's output omits its Class-B assumptions declaration.
+
+#### F-7.1: Dirty-Tree Halt
+Breach ⇒ REFUTED: a dirty tree does not halt.
+
+#### F-7.2: Encoding/EOL Halt
+Breach ⇒ REFUTED: CRLF or encoding drift does not halt.
+
+#### F-7.3: Schema-Version Halt
+Breach ⇒ REFUTED: a claim-core schema-version mismatch does not halt.
+
+#### F-7.4: Mid-Run TOCTOU Halt
+Breach ⇒ REFUTED: a mid-run source mutation does not halt.
+
+#### F-8.1: Orphan-Grounding Halt
+Breach ⇒ REFUTED: a `grounded_in` edge pointing to a non-existent claim id does not halt.
+
+#### F-8.2: Split-State Halt
+Breach ⇒ REFUTED: the same claim id present in BOTH corpus files does not halt.
+
+#### F-8.3: Double-Graduation Halt
+Breach ⇒ REFUTED: graduating a claim already in the invariant state does not halt.
+
+#### F-8.4: Retire-Orphan Halt
+Breach ⇒ REFUTED: retiring a claim that a live claim still grounds on does not halt.
+
+**Gate-0 — checked BEFORE any F-atom.**
+
+#### D-1: Operations Invokable
+The four operations — validate, create-candidate, graduate, and retire — are invokable and run to
+completion.
+
+#### D-2: Seeded Malformation Corpus
+A seeded malformation corpus for every F-atom, including the two-file and atomicity cases.
+
+#### D-3: Per-Atom Observed Run-Record
+`atom → command → observed exit/output`, not a summary attestation.
+
+#### D-4: Resolved Provenance
+Resolved pinned provenance of the deliverable.
+
+### 3.5 Out of scope for the builder — stays bond's, permanently
 
 Authoring claim content (e.g. statement, one_liner, prescription) · deciding when a claim is READY to
 graduate, and when a claim is no longer RELEVANT to retire — both human dispositions by bond; the engine
@@ -178,24 +245,24 @@ claim-core field-list's semantic content, which bond ratifies and the builder co
 precondition/viability-edge relation between claims — that is a distinct, not-yet-built edge, out of
 scope here · not a proposal to any shared library.
 
-## 6. Extraction component — the single-pane view *(a component of THIS engine, not a peer commission)*
+## 4. Component B — the single-pane extraction view
 
 The engine also answers a second standing requirement over the same corpus: a **deterministic
 single-pane view** of the dyad's claims across its prose artifacts, so the Operator can evaluate the
 Agent's evaluations. Per the scope correction — **one** engine; `commission-invariant-engine`'s extractor
 is a **component**, not a peer commission — the extractor's requirements fold in **here**, and that
-repo's placeholder `REQUIREMENTS.md` is **subsumed and retired** by this section.
+repo's placeholder `REQUIREMENTS.md` is **subsumed and retired** by this component.
 
 **Provenance — learning, not obligation.** A working extractor was built and delivered **F-green** under
 the 2026-06-17 two-party commission (cairn, Builder), against a *single* structural sidecar
 (`invariants-bond.structure.yaml`). That effort enters here as **proven learning that de-risks** — its
 behavioral contract is known-satisfiable — **not** as an artifact this (not-yet-built) engine is obliged
-to reuse as-is. This section states **target behavior**; whether the built code is reused, reworked, or
-rewritten under it is the Architect/Builder's call (§6.5). The single-identity / two-corpus model (§1,
+to reuse as-is. This component states **target behavior**; whether the built code is reused, reworked, or
+rewritten under it is the Architect/Builder's call (§4.5). The single-identity / two-corpus model (§1,
 R3–R4) is a **material change** from the pilot's single-sidecar world, so its behavior is **new scope**,
 and its acceptance atoms are marked below **new** vs **green** to keep the attestation honest.
 
-### 6.1 Intent — placed-and-bounded non-determinism
+### 4.1 Intent — placed-and-bounded non-determinism
 
 Full mechanical semantic extraction is impossible — somewhere a judgment says "this sentence is a claim."
 The component does not eliminate that non-determinism; it **places and bounds** it: the semantic act —
@@ -205,7 +272,7 @@ The motivating requirement, falsified in the pilot: an agent-pass extraction mak
 selection/compression/grouping calls per entry, so two runs differ — a measurement instrument that reads
 differently on identical input is not an instrument, and it contaminates every downstream evaluation.
 
-### 6.2 Semantic requirements — the extraction contract (RX-n)
+### 4.2 Semantic requirements — the extraction contract (RX-n)
 
 - **RX1 — deterministic extraction.** Scan a configured source-list of prose artifacts; collect tagged
   claim-blocks; emit a view (header: source-sha pins + generation stamp; body: grouped claim one-liners +
@@ -230,54 +297,97 @@ differently on identical input is not an instrument, and it contaminates every d
   (mirrors R7). An **untagged-candidate** heuristic scan MAY emit a candidate queue as Generate's inbox;
   it never blocks emission.
 
-### 6.3 Constraints
+### 4.3 Constraints
 
-The §3 precondition set applies to extraction runs **unchanged** — A-1 committed-state, A-2 UTF-8/LF,
+The §2 precondition set applies to extraction runs **unchanged** — A-1 committed-state, A-2 UTF-8/LF,
 A-3 version-match, A-4 source-integrity/TOCTOU — with one extension: source-integrity now pins **both**
-corpus files' shas (the view reads the union, not one sidecar), checked before AND after scan. The §3
+corpus files' shas (the view reads the union, not one sidecar), checked before AND after scan. The §2
 solution-shape properties — portable-by-config (F-5), auditable, no hidden persistent state,
-self-contained/stdlib — apply identically.
+self-contained/stdlib — apply identically. *(A-5 atomicity does not apply — extraction is read-only.)*
 
-### 6.4 Acceptance criteria — the extraction F-set (F-X-n)
+### 4.4 Acceptance criteria — the extraction F-set (F-X-n)
 
-**Namespaced `F-X-` on purpose** (see §0): the factory F-set (§4) and this set are **template-fill
-twins** — same skeleton, *different contracts* — so they stay in distinct label-spaces. Each atom is
-binary {MET | REFUTED | UNVERIFIED}. **`green`** marks an atom the 2026-06-17 delivery already passed
-*for the single-sidecar architecture* — a **de-risking prior, NOT a pass for the reworked union-view
-component** (re-run required); **`new`** marks union-view / single-identity scope with no prior
-validation.
+**Namespaced `F-X-` on purpose** (see §0): the factory F-set (§3.4) and this set are **template-fill
+twins** — same skeleton, *different contracts* — so they stay in distinct label-spaces. Each atom
+resolves to exactly one of {MET | REFUTED | UNVERIFIED} (UNVERIFIED until an observed run-record exists
+per DX-3). Each atom carries its breach-condition (observing the breach ⇒
+REFUTED unless MET) and a **prior** marker: **`green`** marks an atom the 2026-06-17 delivery already
+passed *for the single-sidecar architecture* — a **de-risking prior, NOT a pass for the reworked
+union-view component** (re-run required); **`new`** marks union-view / single-identity scope with no
+prior validation.
 
-| atom | breach-condition (⇒ REFUTED unless MET) | prior |
-|---|---|---|
-| F-X-1.1 fn-determinism | two runs over identical in-memory source differ ≥1 byte | green |
-| F-X-1.2 sha-determinism | two runs over identical source shas differ ≥1 byte | green |
-| F-X-2.1 unclosed-tag halt | an unclosed tag does not halt | green |
-| F-X-2.2 dup-tag-id halt | a duplicate prose tag id does not halt | green |
-| F-X-2.3 missing-source halt | a missing/unreadable source does not halt | green |
-| F-X-3 staleness guard | source mutated post-emit; the guard fails to arm | green (extend to two-corpus pins) |
-| F-X-4 no one-liner drift | any emitted one-liner ≠ its stored source one-liner | green |
-| F-X-5 portability | a second dyad's substrate needs code, not config | green |
-| F-X-6 trust-boundary header | an emitted view omits its BX-1..BX-4 declaration | green |
-| F-X-7.1 dirty-tree halt | a dirty tree does not halt | green |
-| F-X-7.2 encoding/EOL halt | CRLF/encoding drift does not halt | green |
-| F-X-7.3 grammar-version halt | a tag-grammar version mismatch does not halt | green |
-| F-X-7.4 mid-scan TOCTOU halt | a mid-scan source mutation does not halt | green |
-| F-X-8.1 orphan-tag halt | a tag id present in **neither** corpus does not halt | **new** (was "no sidecar entry") |
-| F-X-8.2 split-state halt | a tag id present in **both** corpora (an R4 corruption) does not halt | **new** |
-| F-X-8.3 graduation-linkage | a claim's tag linkage breaks across its graduation relocation | **new** |
-| F-X-8.4 cross-home-dup halt | the same id in >1 prose tag does not halt | green |
+#### F-X-1.1: Fn-Determinism
+Breach ⇒ REFUTED: two runs over identical in-memory source differ ≥1 byte. *(prior: green)*
 
-**Gate-0 (component), checked before any F-X atom.** DX-1 a runnable `extract` entrypoint · DX-2 seeded
-corpus for every F-X atom, **including** the union-view and graduation-relocation cases the pilot's
-single-sidecar scope never needed · DX-3 per-atom OBSERVED run-record — `atom → command → observed
-exit/output` · DX-4 resolved pinned provenance of the deliverable.
+#### F-X-1.2: SHA-Determinism
+Breach ⇒ REFUTED: two runs over identical source shas differ ≥1 byte. *(prior: green)*
 
-### 6.5 Out of scope for the builder — extraction
+#### F-X-2.1: Unclosed-Tag Halt
+Breach ⇒ REFUTED: an unclosed tag does not halt. *(prior: green)*
+
+#### F-X-2.2: Dup-Tag-ID Halt
+Breach ⇒ REFUTED: a duplicate prose tag id does not halt. *(prior: green)*
+
+#### F-X-2.3: Missing-Source Halt
+Breach ⇒ REFUTED: a missing/unreadable source does not halt. *(prior: green)*
+
+#### F-X-3: Staleness Guard
+Breach ⇒ REFUTED: source mutated post-emit; the guard fails to arm. *(prior: green — extend to two-corpus pins)*
+
+#### F-X-4: No One-Liner Drift
+Breach ⇒ REFUTED: any emitted one-liner ≠ its stored source one-liner. *(prior: green)*
+
+#### F-X-5: Portability
+Breach ⇒ REFUTED: a second dyad's substrate needs code, not config. *(prior: green)*
+
+#### F-X-6: Trust-Boundary Header
+Breach ⇒ REFUTED: an emitted view omits its BX-1..BX-4 declaration. *(prior: green)*
+
+#### F-X-7.1: Dirty-Tree Halt
+Breach ⇒ REFUTED: a dirty tree does not halt. *(prior: green)*
+
+#### F-X-7.2: Encoding/EOL Halt
+Breach ⇒ REFUTED: CRLF/encoding drift does not halt. *(prior: green)*
+
+#### F-X-7.3: Grammar-Version Halt
+Breach ⇒ REFUTED: a tag-grammar version mismatch does not halt. *(prior: green)*
+
+#### F-X-7.4: Mid-Scan TOCTOU Halt
+Breach ⇒ REFUTED: a mid-scan source mutation does not halt. *(prior: green)*
+
+#### F-X-8.1: Orphan-Tag Halt
+Breach ⇒ REFUTED: a tag id present in **neither** corpus does not halt. *(prior: **new** — was "no sidecar entry")*
+
+#### F-X-8.2: Split-State Halt
+Breach ⇒ REFUTED: a tag id present in **both** corpora (an R4 corruption) does not halt. *(prior: **new**)*
+
+#### F-X-8.3: Graduation-Linkage
+Breach ⇒ REFUTED: a claim's tag linkage breaks across its graduation relocation. *(prior: **new**)*
+
+#### F-X-8.4: Cross-Home-Dup Halt
+Breach ⇒ REFUTED: the same id in >1 prose tag does not halt. *(prior: green)*
+
+**Gate-0 (component) — checked before any F-X atom.**
+
+#### DX-1: Runnable Extract Entrypoint
+A runnable `extract` entrypoint.
+
+#### DX-2: Seeded Corpus
+A seeded corpus for every F-X atom, **including** the union-view and graduation-relocation cases the
+pilot's single-sidecar scope never needed.
+
+#### DX-3: Per-Atom Observed Run-Record
+`atom → command → observed exit/output`.
+
+#### DX-4: Resolved Provenance
+Resolved pinned provenance of the deliverable.
+
+### 4.5 Out of scope for the builder — extraction
 
 Authoring tags/one-liners · deciding what is a claim/invariant · the candidate-queue triage ·
-conflict-detection over the extracted set — all bond's, permanently (mirrors §5). **And, explicitly: this
-section does not mandate reuse of the built `invariant_extractor.py`.** It states target behavior; the
+conflict-detection over the extracted set — all bond's, permanently (mirrors §3.5). **And, explicitly: this
+component does not mandate reuse of the built `invariant_extractor.py`.** It states target behavior; the
 built artifact is **proven learning, not a required dependency** — reuse, rework (the union-view adapter),
 or rewrite is the Architect/Builder's disposition under these requirements. `commission-invariant-engine`
 retires as a separate repo once this lands; the migration/retirement *mechanics* are gate #11 / the
-Architect's fold proposal, not this section's.
+Architect's fold proposal, not this component's.
