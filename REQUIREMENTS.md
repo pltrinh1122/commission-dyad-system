@@ -8,6 +8,10 @@ supersedes:                       # bond-internal; not required to read this doc
   spec: dyad-bond commission spec
   pin: c736f4b
   scope: adopts the single-identity claim model; supersedes the earlier two-record framing and resolves the three points a cairn review falsified
+subsumes:                         # folded in by §6 this increment (fleet gate #12)
+  commission: commission-invariant-engine
+  file: REQUIREMENTS.md (10-line placeholder)
+  scope: the extraction component folds in as §6; the built F-green extractor enters as de-risking LEARNING, not an obligation to reuse as-is
 ---
 
 # REQUIREMENTS — dyad-system: claim/invariant validated-factory engine
@@ -30,12 +34,18 @@ and R6. *retire* — remove a claim that is no longer relevant to the dyad; the 
 *corpus files* — two YAML files that partition claims by state: `theory-pipeline.yaml` holds
 candidates, `invariants-bond.yaml` holds invariants. A claim moves between them, keeping its id, when
 its state changes. The engine treats their paths as configuration, per F-5, so these names are the
-first-instance targets, not hardcoded.
+first-instance targets, not hardcoded. *tag* — a durable inline anchor at a claim's single prose home,
+holding its stored canonical one-liner; the extraction component (§6) binds tags to claim ids over the
+**union** of both corpus files. *view* — the deterministic single-pane emission of tagged claims (§6).
 
 **Label convention — every label is defined in THIS document; none points at an external list.**
 **R-**n is a requirement, §2 · **A-**n is a precondition the engine must enforce, §3 · **B-**n is a
 declared trust-boundary assumption, R7 · **D-**n is a Gate-0 delivery precondition, §4 · **F-**n is an
-acceptance falsifier, §4.
+acceptance falsifier, §4. The **extraction component (§6)** uses namespaced counterparts — **RX-**n
+requirement · **BX-**n trust-boundary · **DX-**n Gate-0 · **F-X-**n falsifier (the §3 preconditions are
+reused unchanged) — kept in a DISTINCT label-space from the factory's because the two share a template
+skeleton but NOT a contract: a same-numbered atom means different things in each (e.g. §4 `F-8.1` is
+orphan-*grounding*; §6 `F-X-8.1` is orphan-*tag*).
 
 ## 1. Intent — what and why
 
@@ -167,3 +177,107 @@ executes a graduation or retirement bond has disposed and never judges readiness
 claim-core field-list's semantic content, which bond ratifies and the builder consumes. Not a
 precondition/viability-edge relation between claims — that is a distinct, not-yet-built edge, out of
 scope here · not a proposal to any shared library.
+
+## 6. Extraction component — the single-pane view *(a component of THIS engine, not a peer commission)*
+
+The engine also answers a second standing requirement over the same corpus: a **deterministic
+single-pane view** of the dyad's claims across its prose artifacts, so the Operator can evaluate the
+Agent's evaluations. Per the scope correction — **one** engine; `commission-invariant-engine`'s extractor
+is a **component**, not a peer commission — the extractor's requirements fold in **here**, and that
+repo's placeholder `REQUIREMENTS.md` is **subsumed and retired** by this section.
+
+**Provenance — learning, not obligation.** A working extractor was built and delivered **F-green** under
+the 2026-06-17 two-party commission (cairn, Builder), against a *single* structural sidecar
+(`invariants-bond.structure.yaml`). That effort enters here as **proven learning that de-risks** — its
+behavioral contract is known-satisfiable — **not** as an artifact this (not-yet-built) engine is obliged
+to reuse as-is. This section states **target behavior**; whether the built code is reused, reworked, or
+rewritten under it is the Architect/Builder's call (§6.5). The single-identity / two-corpus model (§1,
+R3–R4) is a **material change** from the pilot's single-sidecar world, so its behavior is **new scope**,
+and its acceptance atoms are marked below **new** vs **green** to keep the attestation honest.
+
+### 6.1 Intent — placed-and-bounded non-determinism
+
+Full mechanical semantic extraction is impossible — somewhere a judgment says "this sentence is a claim."
+The component does not eliminate that non-determinism; it **places and bounds** it: the semantic act —
+**tagging a claim at its single prose home** — happens ONCE, Operator-gated, at source; everything
+downstream (scan → collect → validate → emit) is **deterministic**. Same input → **byte-identical** view.
+The motivating requirement, falsified in the pilot: an agent-pass extraction makes non-deterministic
+selection/compression/grouping calls per entry, so two runs differ — a measurement instrument that reads
+differently on identical input is not an instrument, and it contaminates every downstream evaluation.
+
+### 6.2 Semantic requirements — the extraction contract (RX-n)
+
+- **RX1 — deterministic extraction.** Scan a configured source-list of prose artifacts; collect tagged
+  claim-blocks; emit a view (header: source-sha pins + generation stamp; body: grouped claim one-liners +
+  source refs). Same input → byte-identical output. Idempotent. No network, no LLM call at runtime.
+- **RX2 — bind tags to the UNIFIED claim view (NEW — supersedes the pilot's single sidecar).** Under the
+  single-identity model, a claim's id lives in exactly ONE of the two state-partition corpora at a time
+  (`theory-pipeline.yaml` candidates ∪ `invariants-bond.yaml` invariants, per R3–R4). A prose tag binds
+  to a claim id resolved against the **union of both corpora** — not against a separate structural
+  sidecar. The pilot's merge (`view = extract(md) ⊕ sidecar`, keyed on one file) does **not** carry over;
+  the union-read is the component's defining rework.
+- **RX3 — graduation-stable linkage (NEW).** Because a claim **relocates** between corpora on graduation
+  (R3), keeping its id, a tag's binding must **survive the state transition**: a claim tagged in prose
+  must not break its linkage when it moves `theory-pipeline.yaml` → `invariants-bond.yaml`. The union-view
+  is what makes this hold — the tag binds to the *id*, resolvable in whichever corpus currently holds it.
+- **RX4 — one-liner fidelity / no drift.** The inline tag carries **only** the stored canonical one-liner
+  (authored at ratification, never regenerated); the claim's content single-homes at its prose source. Any
+  emitted one-liner ≠ its stored source one-liner is a breach.
+- **RX5 — declared trust boundary (extraction B-set, BX-1..BX-4).** Every emitted view DECLARES its
+  assumed semantic preconditions — **BX-1** tagging-completeness (tagged = the whole claim class),
+  **BX-2** one-liner fidelity, **BX-3** single-home integrity (no untagged paraphrase drifting), **BX-4**
+  status truthfulness — whose *truth* is bond's discipline, never mechanically verified from inside
+  (mirrors R7). An **untagged-candidate** heuristic scan MAY emit a candidate queue as Generate's inbox;
+  it never blocks emission.
+
+### 6.3 Constraints
+
+The §3 precondition set applies to extraction runs **unchanged** — A-1 committed-state, A-2 UTF-8/LF,
+A-3 version-match, A-4 source-integrity/TOCTOU — with one extension: source-integrity now pins **both**
+corpus files' shas (the view reads the union, not one sidecar), checked before AND after scan. The §3
+solution-shape properties — portable-by-config (F-5), auditable, no hidden persistent state,
+self-contained/stdlib — apply identically.
+
+### 6.4 Acceptance criteria — the extraction F-set (F-X-n)
+
+**Namespaced `F-X-` on purpose** (see §0): the factory F-set (§4) and this set are **template-fill
+twins** — same skeleton, *different contracts* — so they stay in distinct label-spaces. Each atom is
+binary {MET | REFUTED | UNVERIFIED}. **`green`** marks an atom the 2026-06-17 delivery already passed
+*for the single-sidecar architecture* — a **de-risking prior, NOT a pass for the reworked union-view
+component** (re-run required); **`new`** marks union-view / single-identity scope with no prior
+validation.
+
+| atom | breach-condition (⇒ REFUTED unless MET) | prior |
+|---|---|---|
+| F-X-1.1 fn-determinism | two runs over identical in-memory source differ ≥1 byte | green |
+| F-X-1.2 sha-determinism | two runs over identical source shas differ ≥1 byte | green |
+| F-X-2.1 unclosed-tag halt | an unclosed tag does not halt | green |
+| F-X-2.2 dup-tag-id halt | a duplicate prose tag id does not halt | green |
+| F-X-2.3 missing-source halt | a missing/unreadable source does not halt | green |
+| F-X-3 staleness guard | source mutated post-emit; the guard fails to arm | green (extend to two-corpus pins) |
+| F-X-4 no one-liner drift | any emitted one-liner ≠ its stored source one-liner | green |
+| F-X-5 portability | a second dyad's substrate needs code, not config | green |
+| F-X-6 trust-boundary header | an emitted view omits its BX-1..BX-4 declaration | green |
+| F-X-7.1 dirty-tree halt | a dirty tree does not halt | green |
+| F-X-7.2 encoding/EOL halt | CRLF/encoding drift does not halt | green |
+| F-X-7.3 grammar-version halt | a tag-grammar version mismatch does not halt | green |
+| F-X-7.4 mid-scan TOCTOU halt | a mid-scan source mutation does not halt | green |
+| F-X-8.1 orphan-tag halt | a tag id present in **neither** corpus does not halt | **new** (was "no sidecar entry") |
+| F-X-8.2 split-state halt | a tag id present in **both** corpora (an R4 corruption) does not halt | **new** |
+| F-X-8.3 graduation-linkage | a claim's tag linkage breaks across its graduation relocation | **new** |
+| F-X-8.4 cross-home-dup halt | the same id in >1 prose tag does not halt | green |
+
+**Gate-0 (component), checked before any F-X atom.** DX-1 a runnable `extract` entrypoint · DX-2 seeded
+corpus for every F-X atom, **including** the union-view and graduation-relocation cases the pilot's
+single-sidecar scope never needed · DX-3 per-atom OBSERVED run-record — `atom → command → observed
+exit/output` · DX-4 resolved pinned provenance of the deliverable.
+
+### 6.5 Out of scope for the builder — extraction
+
+Authoring tags/one-liners · deciding what is a claim/invariant · the candidate-queue triage ·
+conflict-detection over the extracted set — all bond's, permanently (mirrors §5). **And, explicitly: this
+section does not mandate reuse of the built `invariant_extractor.py`.** It states target behavior; the
+built artifact is **proven learning, not a required dependency** — reuse, rework (the union-view adapter),
+or rewrite is the Architect/Builder's disposition under these requirements. `commission-invariant-engine`
+retires as a separate repo once this lands; the migration/retirement *mechanics* are gate #11 / the
+Architect's fold proposal, not this section's.
